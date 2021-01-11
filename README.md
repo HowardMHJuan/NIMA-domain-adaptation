@@ -1,3 +1,11 @@
+# NIMA Domain Adaptation
+
+- Download trained model at: https://drive.google.com/drive/u/1/folders/1QJq7wIOxOZwTn1DCPJukHhwiT2KWLaIf, put them under `saved/`
+- To test DA: `python test_adapt.py`, add `--img-path` or `--img-dir` args
+- To train DA: download AVA dataset and `python adapt.py`
+
+---
+
 ## NIMA: Neural IMage Assessment
 
 ![python 3.6+](https://img.shields.io/badge/python-3.6%2B-blue)
