@@ -52,9 +52,9 @@ if __name__ == "__main__":
     encoder.eval()
     classifier.eval()
     discriminator.train()
-    for epoch in range(100):
+    for epoch in range(10):
         group_set.update_and_process()
-        group_loader = DataLoader(group_set, batch_size=32, shuffle=True, num_workers=16)
+        group_loader = DataLoader(group_set, batch_size=30, shuffle=True, num_workers=16)
 
         loss_list = []
         for data in group_loader:
@@ -85,13 +85,13 @@ if __name__ == "__main__":
     # --- ---
 
     # --- Step 3 ---
-    optimizer_gh = torch.optim.Adam(list(encoder.parameters()) + list(classifier.parameters()), lr=1e-3)
-    optimizer_d = torch.optim.Adam(discriminator.parameters(), lr=1e-3)
+    optimizer_gh = torch.optim.Adam(list(encoder.parameters()) + list(classifier.parameters()), lr=1e-4)
+    optimizer_d = torch.optim.Adam(discriminator.parameters(), lr=1e-4)
  
     for epoch in range(100):
         # --- train g and h, d frozen
         group_set.update_and_process()
-        group_loader = DataLoader(group_set, batch_size=32, shuffle=True, num_workers=16)
+        group_loader = DataLoader(group_set, batch_size=30, shuffle=True, num_workers=16)
 
         loss_list = []
         encoder.train()
@@ -137,6 +137,8 @@ if __name__ == "__main__":
 
                 loss_sum = loss_1 + loss_2 + 0.2*loss_d
                 loss_sum.backward()
+
+                nn.utils.clip_grad_norm_(list(encoder.parameters()) + list(classifier.parameters()), 2)
                 optimizer_gh.step()
 
                 loss_list.append(loss_sum.item())
@@ -167,6 +169,8 @@ if __name__ == "__main__":
 
                 loss = loss_fn(yg_pred, yg)
                 loss.backward()
+
+                nn.utils.clip_grad_norm_(discriminator.parameters(), 2)
                 optimizer_d.step()
 
                 loss_list.append(loss.item())
