@@ -9,12 +9,19 @@ from model.model import Encoder, Classifier, Discriminator, emd_loss
 
 
 class Inference():
-    def __init__(self, device):
+    def __init__(self, device, mode="adapt"):
         self._encoder = Encoder()
         self._classifier = Classifier()
 
-        self._encoder.load_state_dict(torch.load("saved/encoder.pth"))
-        self._classifier.load_state_dict(torch.load("saved/classifier.pth"))
+        if mode == "adapt":
+            self._encoder.load_state_dict(torch.load("saved/encoder.pth"))
+            self._classifier.load_state_dict(torch.load("saved/classifier.pth"))
+        else:  # mode == "nima"
+            state_dict = torch.load("saved/model.pth")
+            encoder_state_dict = {key: val for key, val in state_dict.items() if key.split(".")[0] == "features"}
+            classifier_state_dict = {key: val for key, val in state_dict.items() if key.split(".")[0] == "classifier"}
+            self._encoder.load_state_dict(encoder_state_dict)
+            self._classifier.load_state_dict(classifier_state_dict)
 
         self._encoder.to(device)
         self._classifier.to(device)
