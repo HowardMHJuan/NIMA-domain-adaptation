@@ -1,1 +1,6 @@
-./data/
+data/AVA/*
+!data/AVA/train_label.csv
+
+saved/*
+
+__pycache__

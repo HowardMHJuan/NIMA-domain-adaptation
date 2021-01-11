@@ -8,9 +8,12 @@ NIMA is released under the MIT license. See LICENSE for the fill license text.
 
 import torch
 import torch.nn as nn
+import torchvision
 
-class NIMA(nn.Module):
+from .base_model import BaseModel
 
+
+class NIMA(BaseModel):
     """Neural IMage Assessment model by Google"""
     def __init__(self, base_model, num_classes=10):
         super(NIMA, self).__init__()
@@ -25,6 +28,47 @@ class NIMA(nn.Module):
         out = out.view(out.size(0), -1)
         out = self.classifier(out)
         return out
+
+
+class Encoder(BaseModel):
+    def __init__(self):
+        super().__init__()
+        
+        self.features = torchvision.models.vgg16().features
+
+    def forward(self, inputs):
+        feat = self.features(inputs)
+        return feat.view(feat.size(0), -1)
+
+
+class Classifier(BaseModel):
+    def __init__(self, in_feat=25088, n_class=10):
+        super().__init__()
+
+        self.classifier = nn.Sequential(
+            nn.Dropout(p=0.75),
+            nn.Linear(in_feat, n_class),
+            nn.Softmax()
+        )
+    
+    def forward(self, inputs):
+        return self.classifier(inputs)
+
+
+class Discriminator(BaseModel):
+    def __init__(self, h_feat=1024, in_feat=25088*2):
+        super().__init__()
+
+        self.discriminator = nn.Sequential(
+            nn.Linear(in_feat, h_feat),
+            nn.ReLU(),
+            nn.Linear(h_feat, h_feat),
+            nn.ReLU(),
+            nn.Linear(h_feat, 4),
+        )
+
+    def forward(self, inputs):
+        return self.discriminator(inputs)
 
 
 def single_emd_loss(p, q, r=2):
